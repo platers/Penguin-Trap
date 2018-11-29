@@ -4,7 +4,9 @@
     <title>Penguin Trap</title>
 </head>
 <body>
-    Hello
+    If the center tile falls on your turn you lose!
+
+    <p id="turn">It is Blue's turn</p>
 
     <script src="honeycomb.min.js"></script>
     <script src="svg.js"></script>
@@ -18,15 +20,21 @@
         state: 1,
         render(draw) {
             var color = '#f4270c'
+            var strokewidth = 1
+            var strokecolor = '#999'
             if(this.state == 1) color = '#4286f4'
             if(this.state == 2) color = '#eaf4f7'
             const { x, y } = this.toPoint()
             const corners = this.corners()
-
+            if(this.x == 4 && this.y == 4){
+                console.log(strokewidth)
+                strokewidth = 2
+                strokecolor = 'black'
+            }
             this.draw = draw
                 .polygon(corners.map(({ x, y }) => `${x},${y}`))
             .fill({ opacity: 0.7, color: color })
-            .stroke({ width: 1, color: '#999' })
+            .stroke({ width: strokewidth, color: strokecolor })
             .translate(x, y)
         },
         delete() {
@@ -79,6 +87,8 @@
             }
             hex.delete()
             this.justPlayed = 3 - this.justPlayed
+            if(this.justPlayed == 1) document.getElementById("turn").innerHTML = "It is White's turn";
+            if(this.justPlayed == 2) document.getElementById("turn").innerHTML = "It is Blue's turn";
             this.update()
         },
         unstable: function(hex){
