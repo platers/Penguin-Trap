@@ -14,7 +14,7 @@
     const draw = SVG(document.body)
 
     const Hex = Honeycomb.extendHex({ 
-        size: 30,
+        size: 50,
         state: 1,
         render(draw) {
             var color = '#f4270c'
@@ -34,18 +34,15 @@
             this.draw
                 // stop running animation
             .stop(true, true)
-            .fill({ opacity: 1, color: 'gray' })  
-        },
-        clicked() {
-            this.delete()
+            .attr({ fill: 'gray' })  
         }
     })
     
     const Grid = Honeycomb.defineGrid(Hex)
 
-
     var Board = {
         state: null,
+        justPlayed: 2,
         init: function() {
             this.state = Grid(
                 Hex(3, 1), Hex(4, 1), Hex(5, 1),
@@ -65,16 +62,58 @@
             var idx = 0
             this.state.forEach(hex => {
                 hex.state = colors[idx]
-                console.log(hex.state)
                 idx++
             });
             this.state.forEach(hex => {
                 hex.render(draw)
             });
         },
+        gameOver: function(){
+            var center = this.state.get([4, 4])
+            return center.state == 0
+        },
+        doMove: function(hex){
+            if(hex.state == 0 || hex.state == this.justPlayed){
+                //invalid move
+                return
+            }
+            hex.delete()
+            this.justPlayed = 3 - this.justPlayed
+            this.update()
+        },
+        unstable: function(hex){
+            if(hex.state == 0) return false
 
+            //get alive neighbors
+            var directions = ['NE', 'E', 'SE', 'SW', 'W', 'NW']
+            var exists = [false, false, false, false, false, false]
+            for(var i = 0; i < directions.length; i++){
+                neighbors = this.state.neighborsOf(hex, directions[i])
+                if(neighbors.length == 0) exists[i] = true
+                else exists[i] = neighbors[0].state != 0
+            }
+            for(var i = 0; i < directions.length; i++){
+                if(exists[i % 6] && exists[(i + 3) % 6]) return false
+                if(exists[i % 6] && exists[(i + 2) % 6] && exists[(i + 4) % 6]) return false
+            }
+            return true
+        },
         update: function() {
-
+            var stable = false
+            while(!stable){ //37^2 worst case runtime right now, can be improved
+                stable = true
+                this.state.forEach(hex => {
+                    if(this.unstable(hex)){
+                        hex.delete()
+                        stable = false
+                    }
+                }); 
+            }
+            if(this.gameOver()){
+                console.log("Game over!")
+                console.log(3 - this.justPlayed)
+            }
+            
         }
         
     }
@@ -84,8 +123,7 @@
         const hex = Board.state.get(hexCoordinates)
 
         if (hex) {
-            hex.clicked()
-            Board.update()
+            Board.doMove(hex)
         }
     })
     
