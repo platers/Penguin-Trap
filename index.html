@@ -3,37 +3,91 @@
 <head>
     <title>Penguin Trap</title>
 </head>
-<body onload="render()">
+<body>
     Hello
 
     <script src="honeycomb.min.js"></script>
     <script src="svg.js"></script>
+    <script src="helpers.js"></script>
 
 <script>
-    function render(){
-        console.time()
-        const draw = SVG(document.body)
+    const draw = SVG(document.body)
 
-        const Hex = Honeycomb.extendHex({ size: 30 })
-        const Grid = Honeycomb.defineGrid(Hex)
-        // get the corners of a hex (they're the same for all hexes created with the same Hex factory)
-        const corners = Hex().corners()
-        // an SVG symbol can be reused
-        const hexSymbol = draw.symbol()
-            // map the corners' positions to a string and create a polygon
-            .polygon(corners.map(({ x, y }) => `${x},${y}`))
-            .fill('none')
+    const Hex = Honeycomb.extendHex({ 
+        size: 30,
+        state: 1,
+        render(draw) {
+            var color = '#f4270c'
+            if(this.state == 1) color = '#4286f4'
+            if(this.state == 2) color = '#eaf4f7'
+            const { x, y } = this.toPoint()
+            const corners = this.corners()
+
+            this.draw = draw
+                .polygon(corners.map(({ x, y }) => `${x},${y}`))
+            .fill({ opacity: 0.7, color: color })
             .stroke({ width: 1, color: '#999' })
+            .translate(x, y)
+        },
+        delete() {
+            this.state = 0
+            this.draw
+                // stop running animation
+            .stop(true, true)
+            .fill({ opacity: 1, color: 'gray' })  
+        },
+        clicked() {
+            this.delete()
+        }
+    })
+    
+    const Grid = Honeycomb.defineGrid(Hex)
 
-        // render 10,000 hexes
-        Grid.rectangle({ width: 10, height: 10 }).forEach(hex => {
-            const { x, y } = hex.toPoint()
-            // use hexSymbol and set its position for each hex
-            draw.use(hexSymbol).translate(x, y)
-        })
 
-        // open the console to see how much time it took to render the above code
-        console.timeEnd()
+    var Board = {
+        state: null,
+        init: function() {
+            this.state = Grid(
+                Hex(3, 1), Hex(4, 1), Hex(5, 1),
+                Hex(2, 2), Hex(3, 2), Hex(4, 2), Hex(5, 2), Hex(6, 2), Hex(7, 2),
+                Hex(1, 3), Hex(2, 3), Hex(3, 3), Hex(4, 3), Hex(5, 3), Hex(6, 3),
+                Hex(1, 4), Hex(2, 4), Hex(3, 4), Hex(4, 4), Hex(5, 4), Hex(6, 4), Hex(7, 4),
+                Hex(1, 5), Hex(2, 5), Hex(3, 5), Hex(4, 5), Hex(5, 5), Hex(6, 5),
+                Hex(1, 6), Hex(2, 6), Hex(3, 6), Hex(4, 6), Hex(5, 6), Hex(6, 6),
+                Hex(2, 7), Hex(3, 7), Hex(4, 7)
+            )
+            var colors = []
+            for(var i = 0; i < 37; i++){
+                if(i <= 37 / 2) colors.push(1)
+                else colors.push(2)                
+            }
+            shuffle(colors)
+            var idx = 0
+            this.state.forEach(hex => {
+                hex.state = colors[idx]
+                console.log(hex.state)
+                idx++
+            });
+            this.state.forEach(hex => {
+                hex.render(draw)
+            });
+        },
+
+        update: function() {
+
+        }
+        
     }
+    Board.init()
+    document.addEventListener('click', ({ offsetX, offsetY }) => {
+        const hexCoordinates = Grid.pointToHex([offsetX, offsetY])
+        const hex = Board.state.get(hexCoordinates)
+
+        if (hex) {
+            hex.clicked()
+            Board.update()
+        }
+    })
+    
 </script>
 </body>
