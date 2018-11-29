@@ -1,19 +1,25 @@
-<link rel="stylesheet" type="text/css" href="style.css">
 
 <head>
     <title>Penguin Trap</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="style.css">
 </head>
 <body>
-    If the center tile falls on your turn you lose!
+    <h1>Penguin Trap</h1>
+    <p>"The one who makes the penguin fall off the will lose this came"</p>
+    <p>"Don't fall into the trap of the opponent!"</p>
+    <p>"See who can get the final victory!"</p>
 
     <p id="turn">It is Blue's turn</p>
+    <p id="winner"></p>
+    <div id="board"></div>
 
     <script src="honeycomb.min.js"></script>
     <script src="svg.js"></script>
     <script src="helpers.js"></script>
 
 <script>
-    const draw = SVG(document.body)
+    const draw = SVG('board').size(900, 700)
 
     const Hex = Honeycomb.extendHex({ 
         size: 50,
@@ -122,6 +128,8 @@
             if(this.gameOver()){
                 console.log("Game over!")
                 console.log(3 - this.justPlayed)
+                if(3 - this.justPlayed) document.getElementById("winner").innerHTML = "Blue has won! Refresh to play again"
+                if(3 - this.justPlayed) document.getElementById("winner").innerHTML = "White has won! Refresh to play again"
             }
             
         }
