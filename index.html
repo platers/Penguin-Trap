@@ -128,8 +128,8 @@
             if(this.gameOver()){
                 console.log("Game over!")
                 console.log(3 - this.justPlayed)
-                if(3 - this.justPlayed) document.getElementById("winner").innerHTML = "Blue has achieved final victory! Refresh to play again"
-                if(3 - this.justPlayed) document.getElementById("winner").innerHTML = "White has achieved final victory! Refresh to play again"
+                if(3 - this.justPlayed == 1) document.getElementById("winner").innerHTML = "Blue has achieved final victory! Refresh to play again"
+                if(3 - this.justPlayed == 2) document.getElementById("winner").innerHTML = "White has achieved final victory! Refresh to play again"
             }
             
         }
